@@ -2,6 +2,8 @@ plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.compose.compiler)
   alias(libs.plugins.kotlin.serialization)
+  alias(libs.plugins.legacy.kapt)
+  alias(libs.plugins.hilt)
 }
 
 android {
@@ -81,4 +83,20 @@ dependencies {
   implementation(libs.androidx.navigation3.ui)
   implementation(libs.androidx.navigation3.runtime)
   implementation(libs.androidx.lifecycle.viewmodel.navigation3)
+
+  // Hilt
+  implementation(libs.hilt.android)
+  kapt(libs.hilt.compiler)
+
+  // Room
+  implementation(libs.room.runtime)
+  kapt(libs.room.compiler)
+  implementation(libs.room.ktx)
+
+  // ML Kit Scanner & Text Recognition (OCR)
+  implementation(libs.mlkit.document.scanner)
+  implementation(libs.mlkit.text.recognition)
+
+  // Coil
+  implementation(libs.coil.compose)
 }
