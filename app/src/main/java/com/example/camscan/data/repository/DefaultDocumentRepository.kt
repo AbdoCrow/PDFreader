@@ -126,6 +126,44 @@ class DefaultDocumentRepository @Inject constructor(
         }
     }
 
+    override suspend fun runOcrOnDocument(context: android.content.Context, documentId: Long) {
+        val docWithPages = documentDao.getDocumentById(documentId) ?: return
+        val ocrResults = mutableListOf<com.google.mlkit.vision.text.Text?>()
+        val sortedPages = docWithPages.pages.sortedBy { it.position }
+        val imagePaths = sortedPages.map { it.imagePath }
+        
+        for (page in sortedPages) {
+            val resultText = com.example.camscan.core.ocr.OcrManager.recognizeText(context, page.imagePath)
+            ocrResults.add(resultText)
+            
+            resultText?.let {
+                documentDao.updatePage(page.copy(ocrText = it.text))
+            }
+        }
+        
+        val appDocsDir = java.io.File(context.filesDir, "scanned_documents")
+        if (!appDocsDir.exists()) appDocsDir.mkdirs()
+        val pdfFile = java.io.File(appDocsDir, "Searchable_${documentId}_${System.currentTimeMillis()}.pdf")
+        
+        val success = com.example.camscan.core.pdf.PdfExporter.generateSearchablePdf(
+            context,
+            imagePaths,
+            ocrResults,
+            pdfFile
+        )
+        
+        if (success) {
+            docWithPages.document.pdfPath?.let { oldPath ->
+                try {
+                    java.io.File(oldPath).delete()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                }
+            }
+            documentDao.updateDocument(docWithPages.document.copy(pdfPath = pdfFile.absolutePath, updatedAt = System.currentTimeMillis()))
+        }
+    }
+
     override fun searchDocuments(query: String): Flow<List<DocumentWithPages>> =
         documentDao.searchDocuments(query)
 }

@@ -116,7 +116,8 @@ class MainActivity : ComponentActivity() {
         }
 
         if (localImagePaths.isNotEmpty()) {
-            documentRepository.createDocument(docTitle, localImagePaths, localPdfPath)
+            val docId = documentRepository.createDocument(docTitle, localImagePaths, localPdfPath)
+            documentRepository.runOcrOnDocument(this@MainActivity, docId)
             withContext(Dispatchers.Main) {
                 Toast.makeText(this@MainActivity, "Scan saved successfully", Toast.LENGTH_SHORT).show()
             }
@@ -146,7 +147,8 @@ class MainActivity : ComponentActivity() {
             var count = 0
             for (res in imported) {
                 if (res.pageImagePaths.isNotEmpty()) {
-                    documentRepository.createDocument(res.title, res.pageImagePaths, res.pdfPath)
+                    val docId = documentRepository.createDocument(res.title, res.pageImagePaths, res.pdfPath)
+                    documentRepository.runOcrOnDocument(this@MainActivity, docId)
                     count++
                 }
             }

@@ -16,5 +16,6 @@ interface DocumentRepository {
     suspend fun updatePage(page: PageEntity)
     suspend fun deletePage(page: PageEntity)
     suspend fun reorderPages(documentId: Long, pages: List<PageEntity>)
+    suspend fun runOcrOnDocument(context: android.content.Context, documentId: Long)
     fun searchDocuments(query: String): Flow<List<DocumentWithPages>>
 }
